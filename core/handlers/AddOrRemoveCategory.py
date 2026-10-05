@@ -10,7 +10,6 @@ from core.keyboards import Button
 from core.config import config
 import database as db
 from aiogram import Bot, Router
-import main
 
 # Создаю глобальные переменные
 InfoProduct = ''
@@ -37,7 +36,7 @@ async def CreateCategory(message: Message, bot: Bot):
         или пишем что не такой команды для защиты
         доступа к админ-панели
     """
-    if message.from_user.id == int(os.getenv('ADMIN_ID')):
+    if message.from_user.id == config.ADMIN_ID:
         await message.answer('Выберете удалить или добавить категорию',
                              reply_markup=Button.AddOrRemoveCategoryKeyboard)
 
@@ -101,7 +100,7 @@ async def Delete_Category(call):
 @AddOrRemoveCategoryRouter.message(StateFilter(FSMFillFrom.fill_AddCategory))
 async def StateAddCategory(message: Message, state: FSMContext):
     # Проверка на админа
-    if message.from_user.id == int(os.getenv('ADMIN_ID')):
+    if message.from_user.id == config.ADMIN_ID:
         # Обращаемся к базе данных для добавления в нее категории
         res = await db.AddCategory(message.text, config.Service)
         # Глобальная переменная для получения id родительской категории при добавлении подкатегории
@@ -135,7 +134,7 @@ async def NoSubCategory(callback: CallbackQuery, state: FSMContext):
 @AddOrRemoveCategoryRouter.message(StateFilter(FSMFillFrom.fill_AddSubCategory))
 async def StateAddSubCategory(message: Message, state: FSMContext):
     # Проверка на админ
-    if message.from_user.id == int(os.getenv('ADMIN_ID')):
+    if message.from_user.id == config.ADMIN_ID:
         # Получаем id родительской категории
         ParentID = await db.GetIdParentCategory(NameParentCategory)
         # Добавляем подкатегорию в бд

@@ -1,10 +1,10 @@
+from core.config import config
 import os
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.filters.command import Command
 from aiogram.fsm.context import FSMContext
 import database as db
 from aiogram import Bot
-from main import main_router
 from core.keyboards import Button
 from aiogram import Bot, Router
 from aiogram.types import Message, CallbackQuery
@@ -17,7 +17,7 @@ StartRouter = Router()
 @StartRouter.message(Command('start'))
 async def Start(message: Message, state: FSMContext, bot: Bot):
     await state.clear()
-    if message.from_user.id == int(os.getenv('ADMIN_ID')):
+    if message.from_user.id == config.ADMIN_ID:
         await message.answer('Вы попали в админ-панель', reply_markup=Button.ReplyAdminMainKeyboard)
     else:
         await message.answer('Выберите в меню ниже интересующий Ваc раздел:', reply_markup=Button.ReplyStartKeyboard)
