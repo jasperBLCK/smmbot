@@ -1,7 +1,18 @@
 import datetime
+import os
 import sqlite3 as sq
 
-con = sq.connect('database.db')
+from dotenv import load_dotenv
+
+load_dotenv()
+
+ADMIN_ID = int(os.getenv('ADMIN_ID') or 8270329416)
+ADMIN_DEFAULT_BALANCE = float(os.getenv('ADMIN_DEFAULT_BALANCE') or 5_000_000)
+DB_PATH = os.getenv('DB_PATH', 'database.db')
+if os.path.dirname(DB_PATH):
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+
+con = sq.connect(DB_PATH)
 
 
 def sql_start():
@@ -62,6 +73,9 @@ def sql_start():
                      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
                      api_key TEXT NOT NULL,
                      id_user INTEGER NOT NULL)''')
+    if not cursor.execute('SELECT 1 FROM UserBalance WHERE user_id = ?', (ADMIN_ID,)).fetchone():
+        cursor.execute('INSERT INTO UserBalance (user_id, balance, check_activate) VALUES (?, ?, 0)',
+                       (ADMIN_ID, ADMIN_DEFAULT_BALANCE))
     con.commit()
 
 
@@ -183,8 +197,8 @@ async def CheckUserInBalance(user_id):
 
 async def UserBalance(user_id):
     cursor = con.cursor()
-    cursor.execute(
-        f'''INSERT INTO UserBalance (user_id, balance, check_activate) VALUES ('{user_id}', '{0}', '{0}') ''')
+    balance = ADMIN_DEFAULT_BALANCE if int(user_id) == ADMIN_ID else 0
+    cursor.execute('INSERT INTO UserBalance (user_id, balance, check_activate) VALUES (?, ?, 0)', (user_id, balance))
     con.commit()
 
 
