@@ -35,7 +35,7 @@ async def MyOrder(message: Message, bot: Bot):
                 NameProduct = await db.GetProductName(order[2])
                 url = 'https://smmpanel.ru/api/v1'
                 data = {
-                    'key': '***REMOVED***',
+                    'key': config.SMMPANEL_API_KEY,
                     'action': 'status',
                     'order': order[8]
                 }
@@ -84,7 +84,7 @@ async def MyOrder(message: Message, bot: Bot):
                     if Service == 'SmmPanel':
                         url = 'https://smmpanel.ru/api/v1'
                         data = {
-                            'key': '***REMOVED***',
+                            'key': config.SMMPANEL_API_KEY,
                             'action': 'status',
                             'order': OrderList[a][8]
                         }
@@ -96,8 +96,8 @@ async def MyOrder(message: Message, bot: Bot):
                     else:
                         url = 'https://smoservice.media/api/'
                         data = {
-                            'user_id': '419104',
-                            'api_key': '***REMOVED***',
+                            'user_id': config.SMOSERVICE_USER_ID,
+                            'api_key': config.SMOSERVICE_API_KEY,
                             'action': 'check_order',
                             'order_id': OrderList[a][8]
                         }

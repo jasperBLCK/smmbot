@@ -26,7 +26,7 @@ async def ParsingSmmPanel():
     # Запрос к SMMPanel для парсинга
     url = 'https://smmpanel.ru/api/v1'
     data = {
-        'key': '***REMOVED***',
+        'key': config.SMMPANEL_API_KEY,
         'action': 'services'
     }
     response = requests.post(url, data=data)
@@ -57,8 +57,8 @@ async def ParsingSmmPanel():
 async def ParsingSmoService():
     url = 'https://smoservice.media/api/'
     data = {
-        'user_id': '419104',
-        'api_key': '***REMOVED***',
+        'user_id': config.SMOSERVICE_USER_ID,
+        'api_key': config.SMOSERVICE_API_KEY,
         'action': 'services'
     }
     response = requests.post(url, data=data)

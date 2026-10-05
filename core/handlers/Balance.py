@@ -83,7 +83,7 @@ async def ReplenishBalance(message: Message, state: FSMContext):
 @BalanceRouter.callback_query(F.data == 'check_pay')
 async def CheckPay(callback: CallbackQuery, state: FSMContext):
     # Создаем запрос на Tegro для проверки прошла ли оплата
-    api_key = '***REMOVED***'
+    api_key = config.TEGRO_API_KEY
     data = {
         'shop_id': str('3FF517A8EF30E24571BDAD4181F24FD0'),
         'nonce': int(time.time()),

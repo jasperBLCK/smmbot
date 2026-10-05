@@ -41,7 +41,7 @@ async def MyOrderAdmin(message: Message, bot: Bot, SearchId=None, SearchLink=Non
                 NameProduct = await db.GetProductName(order[2])
                 url = 'https://smmpanel.ru/api/v1'
                 data = {
-                    'key': '***REMOVED***',
+                    'key': config.SMMPANEL_API_KEY,
                     'action': 'status',
                     'order': order[8]
                 }
@@ -74,7 +74,7 @@ async def MyOrderAdmin(message: Message, bot: Bot, SearchId=None, SearchLink=Non
                     NameProduct = 'sdasdasd' #await db.GetProductName(OrderList[a][2])
                     url = 'https://smmpanel.ru/api/v1'
                     data = {
-                        'key': '***REMOVED***',
+                        'key': config.SMMPANEL_API_KEY,
                         'action': 'status',
                         'order': OrderList[a][8]
                     }

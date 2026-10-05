@@ -207,7 +207,7 @@ async def get_product(message: Message, state: FSMContext):
 @OrderRouter.callback_query(F.data == 'check_trans')
 async def CheckPay(callback: CallbackQuery, state: FSMContext):
     # Делаем запрос в Tegro
-    api_key = '***REMOVED***'
+    api_key = config.TEGRO_API_KEY
     data = {
         'shop_id': str('3FF517A8EF30E24571BDAD4181F24FD0'),
         'nonce': int(time.time()),
@@ -252,7 +252,7 @@ def _post_order(url, data):
 async def OrderSmmPanel(Url, ServiceId, UserId, Sum):
     url = 'https://smmpanel.ru/api/v1'
     data = {
-        'key': '***REMOVED***',
+        'key': config.SMMPANEL_API_KEY,
         'action': 'add',
         'service': ServiceId,
         'link': Url,
@@ -273,8 +273,8 @@ async def OrderSmoService(Url, ServiceId, UserId, Sum):
     print(ServiceId[0])
     url = 'https://smoservice.media/api/'
     data = {
-        'user_id': '419104',
-        'api_key': '***REMOVED***',
+        'user_id': config.SMOSERVICE_USER_ID,
+        'api_key': config.SMOSERVICE_API_KEY,
         'action': 'create_order',
         'service_id': ServiceId[0],
         'count': Quantity,

@@ -7,6 +7,10 @@ import database
 load_dotenv()
 
 TOKEN = os.getenv('TOKEN', '')
+SMMPANEL_API_KEY = os.getenv('SMMPANEL_API_KEY', '')
+SMOSERVICE_USER_ID = os.getenv('SMOSERVICE_USER_ID', '')
+SMOSERVICE_API_KEY = os.getenv('SMOSERVICE_API_KEY', '')
+TEGRO_API_KEY = os.getenv('TEGRO_API_KEY', '')
 ADMIN_ID = database.ADMIN_ID
 ADMIN_DEFAULT_BALANCE = database.ADMIN_DEFAULT_BALANCE
 DB_PATH = database.DB_PATH
