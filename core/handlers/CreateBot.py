@@ -5,7 +5,6 @@ from os import getenv
 from typing import Any, Dict, Union
 from aiogram import Bot, Dispatcher, F, Router
 from aiogram.types import Message, CallbackQuery
-import main
 from core.keyboards import Button
 from aiogram.filters import StateFilter
 from aiogram.utils.token import TokenValidationError, validate_token
@@ -69,7 +68,7 @@ async def get_product(message: Message, state: FSMContext, bot: Bot):
             except TelegramUnauthorizedError:
                 await message.answer("Токен введен неправильно. Попробуйте еще раз", reply_markup=Button.ReplyStartKeyboard)
             await new_bot.delete_webhook(drop_pending_updates=True)
-            await new_bot.set_webhook(main.OTHER_BOTS_URL.format(bot_token=message.text))
+            await new_bot.set_webhook(config.OTHER_BOTS_URL.format(bot_token=message.text))
             await state.clear()
             await message.answer(f"Бот @{bot_user.username} готов к использованию", reply_markup=Button.ReplyStartKeyboard)
     else:

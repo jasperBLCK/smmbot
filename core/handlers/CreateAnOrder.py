@@ -101,7 +101,7 @@ async def CheckPay(message: Message, state: FSMContext):
     await state.clear()
     await message.delete()
     # Проверяем является ли пользователь админом
-    if message.from_user.id == int(os.getenv('ADMIN_ID')):
+    if message.from_user.id == config.ADMIN_ID:
         await message.answer('Вы попали в админ-панель', reply_markup=Button.ReplyAdminMainKeyboard)
     else:
         await message.answer('Выберите в меню ниже интересующий Ваc раздел:', reply_markup=Button.ReplyStartKeyboard)

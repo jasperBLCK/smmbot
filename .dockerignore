@@ -1,0 +1,9 @@
+.git
+.idea
+.env
+data/
+database.db
+**/__pycache__
+*.pyc
+docker-compose.yml
+README.md

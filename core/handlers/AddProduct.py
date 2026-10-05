@@ -31,7 +31,7 @@ class FSMFillFrom(StatesGroup):
 # кнопка добавления товара
 @config.dp.message(F.Text == 'Товары', StateFilter(default_state))
 async def CreateCategory(message: Message, state: FSMContext):
-    if message.from_user.id == int(os.getenv('ADMIN_ID')):
+    if message.from_user.id == config.ADMIN_ID:
         await message.answer('Выберите добавить в категорию, подкатегорию или удалить товар', reply_markup=Button.AddProductToCategoryOrSubCategory.as_markup())
     else:
         await message.answer('Я не знаю такой команды')
@@ -39,7 +39,7 @@ async def CreateCategory(message: Message, state: FSMContext):
 
 @config.dp.message(StateFilter(FSMFillFrom.fill_InfoProduct))
 async def InfoProduct(message: Message, state: FSMContext):
-    if message.from_user.id == int(os.getenv('ADMIN_ID')):
+    if message.from_user.id == config.ADMIN_ID:
         InfoProduct = message.text.split(',')
         ProductName = str(InfoProduct[0])
         MinOrder = int(InfoProduct[1])

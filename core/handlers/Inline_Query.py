@@ -3,7 +3,6 @@ import database as db
 import hashlib
 from aiogram.types import InputTextMessageContent, InlineQueryResultArticle, InlineQuery
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-import main
 from aiogram import Bot, Router
 
 QueryRouter = Router()

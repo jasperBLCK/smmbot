@@ -20,20 +20,20 @@ class FSMFillFrom(StatesGroup):
 # Обработка команды рассылки
 @SendAllRouter.message(F.text == 'Рассылка')
 async def SendAll(message: Message, state: FSMContext):
-    if message.from_user.id == int(os.getenv('ADMIN_ID')):
+    if message.from_user.id == config.ADMIN_ID:
         await message.answer(f'<b>Введите текст рассылки</b>', parse_mode=ParseMode.HTML, reply_markup=Button.BackMainKeyboard)
         await state.set_state(FSMFillFrom.CheckTextSendAll)
 
 
 # Обработка FSM
 @SendAllRouter.message(StateFilter(FSMFillFrom.CheckTextSendAll))
-async def CheckSendAll(message: Message, state: FSMContext):
+async def CheckSendAll(message: Message, state: FSMContext, bot: Bot):
     # Получем из бд всех юзеров бота
     users = await db.GetUsers()
     # Перебираем и отправляем сообщение
     for user in users:
         try:
-            await config.bot.send_message(user[0], message.text, parse_mode=ParseMode.HTML)
+            await bot.send_message(user[0], message.text, parse_mode=ParseMode.HTML)
         # Если не получилось значит пользователь нас заблокировал
         except:
             await message.answer(f'Пользователь {user[0]} заблокировал бот')
