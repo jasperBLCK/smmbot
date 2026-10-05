@@ -43,7 +43,7 @@ async def ReferralLink(message: Message, bot: Bot):
            '⤵️ Ваши ссылки:\n' \
            f'└https://t.me/{Info.username}?start={message.from_user.id}\n'
     # Возвращаем в главное меню
-    if message.from_user.id == int(os.getenv('ADMIN_ID')):
+    if message.from_user.id == config.ADMIN_ID:
         await message.answer(text, reply_markup=Button.ReplyAdminMainKeyboard)
     else:
         await message.answer(text, reply_markup=Button.ReplyStartKeyboard)
