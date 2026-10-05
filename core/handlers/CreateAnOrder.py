@@ -1,4 +1,5 @@
 # Создание заказа
+import logging
 import os
 from aiogram import F
 from urllib.parse import urlencode
@@ -28,6 +29,18 @@ order_id = ''
 Service = ''
 
 OrderRouter = Router()
+
+
+class OrderError(Exception):
+    pass
+
+
+def _error_text(OrderData, response):
+    if isinstance(OrderData, dict):
+        for key in ('desc', 'error', 'message'):
+            if OrderData.get(key):
+                return str(OrderData[key])
+    return f'HTTP {response.status_code}: {response.text[:200]}'
 
 
 # Создаем FSM
@@ -81,9 +94,11 @@ async def buy_product(callback: CallbackQuery, state: FSMContext):
     global ProductId
     global PriceProduct
     global Quantity
+    global Service
     # Получаем id товара из бд
     ProductId = int(callback.data[12:])
     InfoProduct = await db.GetOneProduct(ProductId)
+    Service = await db.GetServiceCategory(InfoProduct[1])
     PriceProduct = InfoProduct[5]
     Quantity = InfoProduct[3]
     # Выводим данные о товаре
@@ -157,6 +172,18 @@ async def get_product(message: Message, state: FSMContext):
         else:
             # Если денег хватает, то отправляем заказ в SMMPanel
             await db.WriteOffTheBalance(UserId, Sum)
+            Url = message.text
+            try:
+                if Service == 'SmmPanel':
+                    res = await OrderSmmPanel(Url, ServiceId, UserId, Sum)
+                else:
+                    res = await OrderSmoService(Url, ServiceId, UserId, Sum)
+            except OrderError as e:
+                await db.UpdateBalance(UserId, Sum)
+                await state.clear()
+                await message.answer(f'Не удалось создать заказ, деньги возвращены на баланс.\nОтвет сервиса: {e}')
+                return
+            await message.answer(res)
             Referrals = await db.GetReferral(UserId)
             if Referrals is not None:
                 SecondLevelReferral = await db.GetReferral(Referrals)
@@ -167,13 +194,6 @@ async def get_product(message: Message, state: FSMContext):
                 ReferralSum = Sum * 0.12
                 await db.UpdateMoneyReferral(Referrals, ReferralSum)
                 await db.UpdateBalance(Referrals, ReferralSum)
-            Url = message.text
-            if Service == 'SmmPanel':
-                res = await OrderSmmPanel(Url, ServiceId, UserId, Sum)
-                await message.answer(res)
-            else:
-                res = await OrderSmoService(Url, ServiceId, UserId, Sum)
-                await message.answer(res)
         await state.clear()
     # Если пользователь отправил не ссылку
     else:
@@ -217,6 +237,18 @@ async def CheckPay(callback: CallbackQuery, state: FSMContext):
             await callback.message.answer('Оплата не прошла')
 
 
+def _post_order(url, data):
+    try:
+        response = requests.post(url, data=data, timeout=30)
+    except requests.RequestException as e:
+        logging.error('Order request to %s failed: %s', url, e)
+        raise OrderError('сервис недоступен') from e
+    try:
+        return response.json(), response
+    except ValueError:
+        return None, response
+
+
 async def OrderSmmPanel(Url, ServiceId, UserId, Sum):
     url = 'https://smmpanel.ru/api/v1'
     data = {
@@ -226,10 +258,12 @@ async def OrderSmmPanel(Url, ServiceId, UserId, Sum):
         'link': Url,
         'quantity': Quantity
     }
-    response = requests.post(url, data=data)
-    OrderData = json.loads(response.text)
-    Status = (OrderData['status'])
-    Order_Id = (OrderData['order'])
+    OrderData, response = _post_order(url, data)
+    if not isinstance(OrderData, dict) or 'order' not in OrderData:
+        logging.error('SmmPanel order failed: %s %s', response.status_code, response.text[:500])
+        raise OrderError(_error_text(OrderData, response))
+    Status = OrderData.get('status', '')
+    Order_Id = OrderData['order']
     # Добавляем в бд все данные о заказе
     res = await db.AddOrders(UserId, ProductId, Quantity, Sum, ServiceId[0], Url, Order_Id, Status)
     return res
@@ -246,10 +280,13 @@ async def OrderSmoService(Url, ServiceId, UserId, Sum):
         'count': Quantity,
         'url': Url,
     }
-    response = requests.post(url, data=data)
-    OrderData = json.loads(response.text)
-    Status = (OrderData['type'])
-    Order_Id = (OrderData['data']['order_id'])
+    OrderData, response = _post_order(url, data)
+    OrderInfo = OrderData.get('data') if isinstance(OrderData, dict) else None
+    if not isinstance(OrderInfo, dict) or 'order_id' not in OrderInfo:
+        logging.error('SmoService order failed: %s %s', response.status_code, response.text[:500])
+        raise OrderError(_error_text(OrderData, response))
+    Status = OrderData.get('type', '')
+    Order_Id = OrderInfo['order_id']
     # Добавляем в бд все данные о заказе
     res = await db.AddOrders(UserId, ProductId, Quantity, Sum, ServiceId[0], Url, Order_Id, Status)
     return res
